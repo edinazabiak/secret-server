@@ -24,17 +24,59 @@ class Database {
         }
     }
 
-    public function getAllSecret() {
+    /**
+     * Lekérjük a secret tábla összes sorát. 
+     * 
+     * @return array
+     */
+    public function getAllSecret() 
+    {
         $sql = "SELECT * FROM secret";
         $stmt = $this->conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function createSecret($hash, $secretText, $createdAt, $expiresAt, $remainingViews) {
+    /**
+     * Létrehozunk egy új sort a secret táblában. 
+     * 
+     * @return string
+     */
+    public function createSecret($hash, $secretText, $createdAt, $expiresAt, $remainingViews) 
+    {
         $sql = "INSERT INTO secret (hashCode, secretText, createdAt, expiresAt, remainingViews)
                 VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);
         $stmt->execute([$hash, $secretText, $createdAt, $expiresAt, $remainingViews]);
-        return $this->conn->lastInsertId();
+        return $hash;
+    }
+
+    /**
+     * Lekérjük a secret tábla egy bizonyos sorát, amelynek a hash-e megegyezik a paraméterként megadott értékkel. 
+     * 
+     * @param string $hash Lekérendő titok hash kódja.
+     * 
+     * @return array
+     */
+    public function getSecretByHash($hash) 
+    {
+        $sql = "SELECT * FROM secret WHERE hashcode=?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$hash]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Frissítjük a megtekintendő titok lehetséges megtekintéseinek számát. 
+     * 
+     * @param string $hash Lekérendő titok hash kódja. 
+     * 
+     * @return void
+     */
+    public function updateRemainingView($hash)
+    {
+        $sql = "UPDATE secret SET remainingViews = remainingViews-1 WHERE hashCode=?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$hash]);
+
     }
 }
