@@ -1,8 +1,8 @@
 <?php
 
 class Controller {
-
-    private Database $db;
+ 
+    private $db;
 
     public function __construct($database)
     {
@@ -27,7 +27,20 @@ class Controller {
                 echo json_encode($this->db->getAllSecret());
                 break;
             case "POST": 
-                break;
+                $data = (array) json_decode(file_get_contents("php://input"), true);
+                $secret = new Secret($data["secret"], $data["expireAfter"], $data["expireAfterViews"], $this->db);
+                if (!is_int($data["expireAfter"]) || !is_int($data["expireAfterViews"]) || $secret->isValidExpiresAt() == false || $secret->isValidRemainingViews() == false) {
+                    http_response_code(405);
+                    echo json_encode(["description" => "Invalid input"]);
+                    break;
+                } else {
+                    $id = $this->db->createSecret($secret->generateHash(), $data["secret"], $secret->createdAt, $secret->expiresAt, $data["expireAfterViews"]);
+                    echo json_encode([
+                        "description" => "Successful operation",
+                        "id" => $id
+                    ]);
+                    break;
+                }
         }
     }
 

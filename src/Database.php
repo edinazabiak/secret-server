@@ -12,8 +12,7 @@ class Database {
     {
         try {
             $dsn = "mysql:host=" . $this->host . ";dbname=" . $this->dbname;
-            $this->conn = new PDO($dsn, $this->user, $this->password);
-            $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->conn = new PDO($dsn, $this->user, $this->password, [PDO::ATTR_EMULATE_PREPARES => false, PDO::ATTR_STRINGIFY_FETCHES => false]);
         } catch(PDOException $e) {
             http_response_code(500);
             echo json_encode([
@@ -29,5 +28,13 @@ class Database {
         $sql = "SELECT * FROM secret";
         $stmt = $this->conn->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function createSecret($hash, $secretText, $createdAt, $expiresAt, $remainingViews) {
+        $sql = "INSERT INTO secret (hashCode, secretText, createdAt, expiresAt, remainingViews)
+                VALUES (?, ?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute([$hash, $secretText, $createdAt, $expiresAt, $remainingViews]);
+        return $this->conn->lastInsertId();
     }
 }
