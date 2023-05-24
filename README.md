@@ -5,8 +5,6 @@ A feladat egy titkos szerver megvalósítása, ahol titkokat lehet tárolni, lé
 ## Program használata: 
 A program használatához érdemes valamilyen API platformot, mint például HTTPie, Insomnia vagy Postman. 
 
-Az API élőben az alábbi címen elérhető: [https://www.zabiakedina.hu/secret-server/](https://www.zabiakedina.hu/secret-server/)
-
 ### Minden titok lekérése: 
 Input: 
 ```
